@@ -1,14 +1,9 @@
-# pingradar
-Ping IPs and display as a radar
+# flyradar
 
 #### Requirements:
 ```
 pip install pygame
-```
-
-#### Example:
-```
-python3 pingradar.py google.com facebook.com
+pip install FlightRadarAPI
 ```
 
 #### Note:
