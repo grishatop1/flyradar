@@ -1,9 +1,7 @@
 import sys
 import time
-import socket
-import random
 import threading
-import subprocess
+from FlightRadar24.api import FlightRadar24API
 
 import math
 from math import cos, sin
@@ -12,20 +10,23 @@ from copy import copy
 
 import pygame
 
-def ping(ip):
-	result = ''
-	try:
-		response = subprocess.check_output(
-			['ping', '-c', '1', ip],
-			stderr=subprocess.STDOUT,  # get all output
-			universal_newlines=True  # return string not bytes
-		)
-		for word in response.split():
-			if "time=" in word:
-				result = word.strip("time=ms")
-	except subprocess.CalledProcessError:
-		result = 999999999999
-	return int(float(result))
+fr_api = FlightRadar24API()
+
+my_cords = {
+	"lat": 43.873,
+	"lon": 18.557
+}
+
+balkan_zone = {
+    "tl_y": 45.5,
+    "tl_x": 14.4,
+    "br_y": 42.3,
+    "br_x": 23.5
+}
+
+
+def getFlights():
+	pass
 
 
 class PingManager:
@@ -38,8 +39,8 @@ class PingManager:
 			angle = i*(628/len(self.ips))/100 + math.pi/6
 			self.info[ip] = {}
 			self.info[ip]["angle"] = angle
-			self.info[ip]["last_ms"] = 0
-			self.info[ip]["render_ms"] = 0
+			self.info[ip]["last_pos"] = (0,0)
+			self.info[ip]["render_pos"] = (0,0)
 
 	def spawnThreads(self):
 		for ip in self.ips:
