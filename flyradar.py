@@ -7,6 +7,8 @@ from FlightRadar24.api import FlightRadar24API
 import math
 from math import cos, sin, atan2
 
+from utils import calcDistance
+
 from copy import copy
 
 import pygame
@@ -38,7 +40,7 @@ class FlightManager:
 		print(self.zone)
 		self.bounds = fr_api.get_bounds(self.zone)
 
-		self.render_multiplier = 400
+		self.render_multiplier = CIRCLE_R*2
 
 		threading.Thread(target=self.getFlightsThread, daemon=True).start()
 
@@ -79,7 +81,9 @@ class FlightManager:
 				"time": time.time(),
 				"x": r_x,
 				"y": r_y,
-				"angle": f_angle
+				"angle": f_angle,
+				"f_x": f_x,
+				"f_y": f_y
 			}
 
 	def renderPlanes(self):
@@ -105,6 +109,14 @@ class FlightManager:
 				color
 			)
 			win.blit(txt, (f["x"]+5, f["y"]+5))
+			dist = calcDistance(coords["lat"], coords["lon"], f["f_y"], f["f_x"])
+
+			txt = font1.render(
+				f"{dist:.2f}km",
+				True,
+				color
+			)
+			win.blit(txt, (f["x"]+5, f["y"]+25))
 
 pygame.init()
 FPS = 60
