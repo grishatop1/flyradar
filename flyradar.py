@@ -38,7 +38,7 @@ class FlightManager:
 		print(self.zone)
 		self.bounds = fr_api.get_bounds(self.zone)
 
-		self.render_multiplayer = 400
+		self.render_multiplier = 400
 
 		threading.Thread(target=self.getFlightsThread, daemon=True).start()
 
@@ -58,8 +58,8 @@ class FlightManager:
 			r_x = coords["lon"] - f_x
 			r_y = coords["lat"] - f_y
 
-			r_x = r_x * self.render_multiplayer
-			r_y = r_y * self.render_multiplayer
+			r_x = r_x * self.render_multiplier
+			r_y = r_y * self.render_multiplier
 
 			r_x *= -1
 
