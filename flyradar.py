@@ -71,8 +71,8 @@ class FlightManager:
 
 			if r_x < 0 or r_x > WIDTH or r_y < 0 or r_y > HEIGHT:
 				print("out of screen")
-			
-			
+
+
 			#if angle >= f_angle and angle < f_angle + 1:
 			self.render_flights[f.id] = {
 				"aircraft": f.number,
@@ -190,15 +190,15 @@ while running:
 		"E",
 		True,
 		(255,255,255)
-	)
-	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, HALF_HEIGHT-txt.get_height()/2))
+	)#positioning is temporary until we find a better fix
+	win.blit(txt, (WIDTH-txt.get_width()/2-(HALF_HEIGHT/3), HALF_HEIGHT-txt.get_height()/2))
 
 	txt = font1.render(
 		"W",
 		True,
 		(255,255,255)
-	)
-	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, HALF_HEIGHT-txt.get_height()/2))
+	)#positioning is temporary until we find a better fix
+	win.blit(txt, (HALF_WIDTH-txt.get_width()/2-HALF_HEIGHT, HALF_HEIGHT-txt.get_height()/2))
 
 	pygame.display.update()
 	angle += toAdd
