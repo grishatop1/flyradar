@@ -1,3 +1,4 @@
+import os
 import json
 import time
 import overpy
@@ -10,6 +11,8 @@ from math import cos, sin, atan2
 from copy import copy
 
 import pygame
+
+os.makedirs("cache", exist_ok=True)
 
 over_api = overpy.Overpass()
 fr_api = FlightRadar24API()
@@ -24,10 +27,10 @@ def calculateZone(distance):
 		br_x = coords["lon"] + distance
 
 		return {
-			"tl_y": round(tl_y, 3),
-			"tl_x": round(tl_x, 3),
-			"br_y": round(br_y, 3),
-			"br_x": round(br_x, 3)
+			"tl_y": tl_y,
+			"tl_x": tl_x,
+			"br_y": br_y,
+			"br_x": br_x
 		}
 
 def calculateZoneOverpy(distance):
@@ -125,10 +128,17 @@ class RoadManager:
 		
 	def getRoads(self):
 		z = self.zone
-		query = f"nwr({z['s']},{z['w']},{z['n']},{z['e']});out;"
-		print(query)
+		query = f"""
+			[out:json][timeout:25];
+			(
+			way["highway"="primary"]({z["s"]},{z["w"]},{z["n"]},{z["e"]});
+			);
+			out body;
+			>;
+			out skel qt;
+			"""
 		res = over_api.query(query)
-		print(len(res))
+		print(res)
 
 pygame.init()
 FPS = 60
@@ -143,7 +153,8 @@ HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
 
 RENDER_MULTIPLAYER = 400
-ZONE = 0.3
+ZONE = 0.05
+CIRCLE_R_METERS = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Ping Radar")
@@ -218,14 +229,14 @@ while running:
 		"E",
 		True,
 		(255,255,255)
-	)#positioning is temporary until we find a better fix
+	)
 	win.blit(txt, (WIDTH-txt.get_width()/2-(HALF_HEIGHT/3), HALF_HEIGHT-txt.get_height()/2))
 
 	txt = font1.render(
 		"W",
 		True,
 		(255,255,255)
-	)#positioning is temporary until we find a better fix
+	)
 	win.blit(txt, (HALF_WIDTH-txt.get_width()/2-HALF_HEIGHT, HALF_HEIGHT-txt.get_height()/2))
 
 	pygame.display.update()
