@@ -4,10 +4,10 @@ from math import sin, cos, sqrt, atan2, radians
 def calcDistance(lat1, lon1, lat2, lon2):
     R = 6373.0
 
-    lat1 = radians(lat1)
-    lon1 = radians(lon1)
-    lat2 = radians(lat2)
-    lon2 = radians(lon2)
+    lat1 = radians(abs(lat1))
+    lon1 = radians(abs(lon1))
+    lat2 = radians(abs(lat2))
+    lon2 = radians(abs(lon2))
 
     dlon = lon2 - lon1
     dlat = lat2 - lat1
