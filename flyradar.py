@@ -61,10 +61,13 @@ class FlightManager:
 			r_x = r_x * self.render_multiplayer
 			r_y = r_y * self.render_multiplayer
 
+			r_x *= -1
+
 			f_angle = atan2(r_y, r_x)
 
 			r_x += HALF_WIDTH
 			r_y += HALF_HEIGHT
+
 
 			if r_x < 0 or r_x > WIDTH or r_y < 0 or r_y > HEIGHT:
 				print("out of screen")
@@ -72,7 +75,7 @@ class FlightManager:
 			
 			#if angle >= f_angle and angle < f_angle + 1:
 			self.render_flights[f.id] = {
-				"aircraft": f.aircraft_code,
+				"aircraft": f.number,
 				"time": time.time(),
 				"x": r_x,
 				"y": r_y,
@@ -167,6 +170,35 @@ while running:
 		(HALF_WIDTH, HEIGHT),
 		1
 	)
+
+	#on each side of the screen, make north south east and west text
+	txt = font1.render(
+		"N",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, 0))
+
+	txt = font1.render(
+		"S",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, HEIGHT-txt.get_height()))
+
+	txt = font1.render(
+		"E",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, HALF_HEIGHT-txt.get_height()/2))
+
+	txt = font1.render(
+		"W",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, HALF_HEIGHT-txt.get_height()/2))
 
 	pygame.display.update()
 	angle += toAdd
