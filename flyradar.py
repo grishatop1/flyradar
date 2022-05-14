@@ -40,8 +40,8 @@ class FlightManager:
 			r_y = coords["lat"] - f_y
 
 
-			r_x = r_x * RENDER_MULTIPLAYER
-			r_y = r_y * RENDER_MULTIPLAYER
+			r_x = r_x * RENDER_MULTIPLIER
+			r_y = r_y * RENDER_MULTIPLIER
 
 
 			r_x *= -1
@@ -155,12 +155,12 @@ HEIGHT = 768
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
 
-RENDER_MULTIPLAYER = 400
-ZONE = 0.05
-CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
-
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
+
+RENDER_MULTIPLIER = CIRCLE_R * 2
+ZONE = 0.05
+CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 
 REFRESH_SECS = 2
 FPS = 60
