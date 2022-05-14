@@ -115,7 +115,7 @@ class RoadManager:
 			print("Getting road data in your region...")
 			self.roads = self.getRoads()
 			with open(f"cache/{zone_hash}.json", "w") as f:
-				json.dump(roads, f)
+				json.dump(self.roads, f)
 
 	def getRoads(self):
 		z = self.zone
@@ -211,7 +211,7 @@ HALF_HEIGHT = HEIGHT // 2
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
-ZONE = 0.07
+ZONE = 0.5
 CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 RENDER_MULTIPLIER = CIRCLE_R / ZONE #pixels per km
 
