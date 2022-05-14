@@ -14,48 +14,12 @@ from copy import copy
 
 import pygame
 
-os.makedirs("cache", exist_ok=True)
-
-over_api = overpy.Overpass()
-fr_api = FlightRadar24API()
-
-with open('coords.json') as f:
-	coords = json.load(f)["coords"]
-
-def calculateZone(distance):
-		tl_y = coords["lat"] + distance
-		tl_x = coords["lon"] - distance
-		br_y = coords["lat"] - distance
-		br_x = coords["lon"] + distance
-
-		return {
-			"tl_y": tl_y,
-			"tl_x": tl_x,
-			"br_y": br_y,
-			"br_x": br_x
-		}
-
-def calculateZoneOverpy(distance):
-	south_edge = coords["lat"] - distance
-	north_edge = coords["lat"] + distance
-	west_edge = coords["lon"] - distance
-	east_edge = coords["lon"] + distance
-	return {
-		"s": south_edge,
-		"n": north_edge,
-		"w": west_edge,
-		"e": east_edge
-	}
-
-
 class FlightManager:
 	def __init__(self):
 		self.flights = {}
 		self.render_flights = {}
 		self.zone = calculateZone(ZONE)
 		self.bounds = fr_api.get_bounds(self.zone)
-
-		self.render_multiplier = CIRCLE_R*2
 
 		threading.Thread(target=self.getFlightsThread, daemon=True).start()
 
@@ -156,12 +120,35 @@ class RoadManager:
 		res = over_api.query(query)
 		print(res)
 
-pygame.init()
-FPS = 60
-clock = pygame.time.Clock()
+os.makedirs("cache", exist_ok=True)
 
-pygame.font.init()
-font1 = pygame.font.SysFont('Arial', 15)
+with open('coords.json') as f:
+	coords = json.load(f)["coords"]
+
+def calculateZone(distance):
+		tl_y = coords["lat"] + distance
+		tl_x = coords["lon"] - distance
+		br_y = coords["lat"] - distance
+		br_x = coords["lon"] + distance
+
+		return {
+			"tl_y": tl_y,
+			"tl_x": tl_x,
+			"br_y": br_y,
+			"br_x": br_x
+		}
+
+def calculateZoneOverpy(distance):
+	south_edge = coords["lat"] - distance
+	north_edge = coords["lat"] + distance
+	west_edge = coords["lon"] - distance
+	east_edge = coords["lon"] + distance
+	return {
+		"s": south_edge,
+		"n": north_edge,
+		"w": west_edge,
+		"e": east_edge
+	}
 
 WIDTH = 1024
 HEIGHT = 768
@@ -170,21 +157,31 @@ HALF_HEIGHT = HEIGHT // 2
 
 RENDER_MULTIPLAYER = 400
 ZONE = 0.05
-CIRCLE_R_METERS = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
-
-win = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Ping Radar")
+CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
 REFRESH_SECS = 2
+FPS = 60
 
 angle = 0
 toAdd = math.pi*2/FPS / 5 #5 seconds
 
+over_api = overpy.Overpass()
+fr_api = FlightRadar24API()
+
 f_mngr = FlightManager()
 r_mngr = RoadManager()
+
+pygame.init()
+clock = pygame.time.Clock()
+
+pygame.font.init()
+font1 = pygame.font.SysFont('Arial', 15)
+
+win = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Ping Radar")
 
 running = True
 while running:
@@ -225,6 +222,13 @@ while running:
 		(HALF_WIDTH, HEIGHT),
 		1
 	)
+
+	txt = font1.render(
+		f"{int(CIRCLE_R_KM)}km radius",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH + CIRCLE_R + 5, HALF_HEIGHT + 5))
 
 	#on each side of the screen, make north south east and west text
 	txt = font1.render(
