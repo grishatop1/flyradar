@@ -1,6 +1,6 @@
-import sys
 import json
 import time
+import overpy
 import threading
 from FlightRadar24.api import FlightRadar24API
 
@@ -11,6 +11,7 @@ from copy import copy
 
 import pygame
 
+over_api = overpy.Overpass()
 fr_api = FlightRadar24API()
 
 with open('coords.json') as f:
@@ -23,22 +24,31 @@ def calculateZone(distance):
 		br_x = coords["lon"] + distance
 
 		return {
-			"tl_y": tl_y,
-			"tl_x": tl_x,
-			"br_y": br_y,
-			"br_x": br_x
+			"tl_y": round(tl_y, 3),
+			"tl_x": round(tl_x, 3),
+			"br_y": round(br_y, 3),
+			"br_x": round(br_x, 3)
 		}
+
+def calculateZoneOverpy(distance):
+	south_edge = coords["lat"] - distance
+	north_edge = coords["lat"] + distance
+	west_edge = coords["lon"] - distance
+	east_edge = coords["lon"] + distance
+	return {
+		"s": south_edge,
+		"n": north_edge,
+		"w": west_edge,
+		"e": east_edge
+	}
 
 
 class FlightManager:
 	def __init__(self):
 		self.flights = {}
 		self.render_flights = {}
-		self.zone = calculateZone(0.3)
-		print(self.zone)
+		self.zone = calculateZone(ZONE)
 		self.bounds = fr_api.get_bounds(self.zone)
-
-		self.render_multiplayer = 400
 
 		threading.Thread(target=self.getFlightsThread, daemon=True).start()
 
@@ -58,8 +68,8 @@ class FlightManager:
 			r_x = coords["lon"] - f_x
 			r_y = coords["lat"] - f_y
 
-			r_x = r_x * self.render_multiplayer
-			r_y = r_y * self.render_multiplayer
+			r_x = r_x * RENDER_MULTIPLAYER
+			r_y = r_y * RENDER_MULTIPLAYER
 
 			r_x *= -1
 
@@ -106,6 +116,20 @@ class FlightManager:
 			)
 			win.blit(txt, (f["x"]+5, f["y"]+5))
 
+class RoadManager:
+	def __init__(self):
+		self.roads = {}
+		self.render_roads = {}
+		self.zone = calculateZoneOverpy(ZONE)
+		self.roads = self.getRoads()
+		
+	def getRoads(self):
+		z = self.zone
+		query = f"nwr({z['s']},{z['w']},{z['n']},{z['e']});out;"
+		print(query)
+		res = over_api.query(query)
+		print(len(res))
+
 pygame.init()
 FPS = 60
 clock = pygame.time.Clock()
@@ -117,6 +141,9 @@ WIDTH = 1024
 HEIGHT = 768
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
+
+RENDER_MULTIPLAYER = 400
+ZONE = 0.3
 
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Ping Radar")
@@ -130,6 +157,7 @@ angle = 0
 toAdd = math.pi*2/FPS / 5 #5 seconds
 
 f_mngr = FlightManager()
+r_mngr = RoadManager()
 
 running = True
 while running:
