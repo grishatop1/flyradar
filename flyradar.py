@@ -34,11 +34,11 @@ class FlightManager:
 	def __init__(self):
 		self.flights = {}
 		self.render_flights = {}
-		self.zone = calculateZone(0.5)
+		self.zone = calculateZone(0.3)
 		print(self.zone)
 		self.bounds = fr_api.get_bounds(self.zone)
 
-		self.render_multiplayer = 200
+		self.render_multiplayer = 400
 
 		threading.Thread(target=self.getFlightsThread, daemon=True).start()
 
@@ -46,6 +46,7 @@ class FlightManager:
 		#later filter certain attributes
 		while True:
 			self.flights = fr_api.get_flights(bounds = self.bounds)
+			print(len(self.flights))
 			time.sleep(REFRESH_SECS)
 
 	def decideFlights(self):
@@ -64,16 +65,19 @@ class FlightManager:
 
 			r_x += HALF_WIDTH
 			r_y += HALF_HEIGHT
+
+			if r_x < 0 or r_x > WIDTH or r_y < 0 or r_y > HEIGHT:
+				print("out of screen")
 			
 			
-			if angle >= f_angle and angle < f_angle + 0.2:
-				self.render_flights[f.id] = {
-					"aircraft": f.aircraft_code,
-					"time": time.time(),
-					"x": r_x,
-					"y": r_y,
-					"angle": f_angle
-				}
+			#if angle >= f_angle and angle < f_angle + 1:
+			self.render_flights[f.id] = {
+				"aircraft": f.aircraft_code,
+				"time": time.time(),
+				"x": r_x,
+				"y": r_y,
+				"angle": f_angle
+			}
 
 	def renderPlanes(self):
 		render_time = 4 #secs max 5 (main line rotating speed)
