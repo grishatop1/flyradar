@@ -171,7 +171,7 @@ class RoadManager:
 					r_y2 += HALF_HEIGHT
 					
 
-					pygame.draw.line(win, (120,120,120), (r_x, r_y), (r_x2, r_y2), 2)
+					pygame.draw.line(win, (65,65,65), (r_x, r_y), (r_x2, r_y2), 2)
 
 os.makedirs("cache", exist_ok=True)
 
@@ -213,7 +213,7 @@ CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
 ZONE = 0.05
 CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
-RENDER_MULTIPLIER = 7000
+RENDER_MULTIPLIER = CIRCLE_R_KM * 2000
 
 REFRESH_SECS = 2
 FPS = 60
