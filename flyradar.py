@@ -160,8 +160,9 @@ class RoadManager:
 				r_x += HALF_WIDTH
 				r_y += HALF_HEIGHT
 
-				#pygame.draw.circle(s, (255,0,0), (r_x, r_y), 1, 1)
-				
+				if (pitagor(HALF_WIDTH, HALF_HEIGHT, r_x, r_y) > CIRCLE_R):
+					continue
+
 				if i+1 < len(road.values()):
 					n_lat2 = l[i+1]["lat"]
 					n_lon2 = l[i+1]["lon"]
@@ -184,6 +185,9 @@ os.makedirs("cache", exist_ok=True)
 
 with open('coords.json') as f:
 	coords = json.load(f)["coords"]
+
+def pitagor(x1, y1, x2, y2):
+	return math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
 def calculateZone(distance):
 		tl_y = coords["lat"] + distance
