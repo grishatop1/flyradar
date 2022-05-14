@@ -105,6 +105,7 @@ class RoadManager:
 		self.render_roads = {}
 		self.zone = calculateZoneOverpy(ZONE)
 		self.checkCache()
+		self.preRenderRoads()
 
 	def checkCache(self):
 		zone_hash = hashlib.md5(json.dumps(self.zone).encode()).hexdigest()
@@ -142,7 +143,10 @@ class RoadManager:
 		
 		return roads
 
-	def renderRoads(self):
+	def preRenderRoads(self):
+		s = pygame.Surface((WIDTH, HEIGHT))
+		s.fill((0,0,0))
+
 		for _id in self.roads:
 			road = self.roads[_id]
 			for i in range(len(road.values())):
@@ -157,7 +161,7 @@ class RoadManager:
 				r_x += HALF_WIDTH
 				r_y += HALF_HEIGHT
 
-				#pygame.draw.circle(win, (255,0,0), (r_x, r_y), 1, 1)
+				#pygame.draw.circle(s, (255,0,0), (r_x, r_y), 1, 1)
 				
 				if i+1 < len(road.values()):
 					n_lat2 = l[i+1]["lat"]
@@ -171,7 +175,11 @@ class RoadManager:
 					r_y2 += HALF_HEIGHT
 					
 
-					pygame.draw.line(win, (65,65,65), (r_x, r_y), (r_x2, r_y2), 2)
+					pygame.draw.line(s, (65,65,65), (r_x, r_y), (r_x2, r_y2), 2)
+		self.s = s
+
+	def renderRoads(self):
+		win.blit(self.s, (0,0))
 
 os.makedirs("cache", exist_ok=True)
 
@@ -211,7 +219,7 @@ HALF_HEIGHT = HEIGHT // 2
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
-ZONE = 0.5
+ZONE = 1
 CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 RENDER_MULTIPLIER = CIRCLE_R / ZONE #pixels per km
 
@@ -249,13 +257,14 @@ while running:
 		angle = 0
 
 	f_mngr.decideFlights()
-	f_mngr.renderPlanes()
+
+	r_mngr.renderRoads()
 
 	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, CIRCLE_R, 1)
 	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3, 1)
 	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3*2, 1)
 
-	r_mngr.renderRoads()
+	f_mngr.renderPlanes()
 
 	p_r = CIRCLE_R
 	p_x = p_r * cos(angle) + CIRCLE_CENTER[0]
