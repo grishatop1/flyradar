@@ -120,7 +120,7 @@ class RoadManager:
 	def getRoads(self):
 		z = self.zone
 		query = f"""
-			[out:json][timeout:25];
+			[out:json];
 			(
 			way["highway"="primary"]({z["s"]},{z["w"]},{z["n"]},{z["e"]});
 			);
