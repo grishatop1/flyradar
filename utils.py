@@ -17,28 +17,3 @@ def calcDistance(lat1, lon1, lat2, lon2):
 
     distance = R * c
     return distance
-
-def calculateZone(distance):
-		tl_y = coords["lat"] + distance
-		tl_x = coords["lon"] - distance
-		br_y = coords["lat"] - distance
-		br_x = coords["lon"] + distance
-
-		return {
-			"tl_y": tl_y,
-			"tl_x": tl_x,
-			"br_y": br_y,
-			"br_x": br_x
-		}
-
-def calculateZoneOverpy(distance):
-	south_edge = coords["lat"] - distance
-	north_edge = coords["lat"] + distance
-	west_edge = coords["lon"] - distance
-	east_edge = coords["lon"] + distance
-	return {
-		"s": south_edge,
-		"n": north_edge,
-		"w": west_edge,
-		"e": east_edge
-	}

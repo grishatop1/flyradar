@@ -2,6 +2,7 @@ import os
 import json
 import time
 import overpy
+import hashlib
 import threading
 from FlightRadar24.api import FlightRadar24API
 
@@ -24,7 +25,6 @@ class FlightManager:
 		threading.Thread(target=self.getFlightsThread, daemon=True).start()
 
 	def getFlightsThread(self):
-		#later filter certain attributes
 		while True:
 			self.flights = fr_api.get_flights(bounds = self.bounds)
 			print(len(self.flights))
@@ -104,8 +104,19 @@ class RoadManager:
 		self.roads = {}
 		self.render_roads = {}
 		self.zone = calculateZoneOverpy(ZONE)
-		self.roads = self.getRoads()
-		
+		self.checkCache()
+
+	def checkCache(self):
+		zone_hash = hashlib.md5(json.dumps(self.zone).encode()).hexdigest()
+		if os.path.exists(f"cache/{zone_hash}.json"):
+			with open(f"cache/{zone_hash}.json", "r") as f:
+				self.roads = json.load(f)
+		else:
+			print("Getting road data in your region...")
+			roads = self.getRoads()
+			with open(f"cache/{zone_hash}.json", "w") as f:
+				json.dump(roads, f, indent=4)
+
 	def getRoads(self):
 		z = self.zone
 		query = f"""
@@ -118,7 +129,49 @@ class RoadManager:
 			out skel qt;
 			"""
 		res = over_api.query(query)
-		print(res)
+		
+		roads = {}
+
+		for way in res.ways:
+			roads[way.id] = {}
+			for n in way.nodes:
+				roads[way.id][n.id] = {
+					"lat": float(n.lat),
+					"lon": float(n.lon)
+				}
+		
+		return roads
+
+	def renderRoads(self):
+		for _id in self.roads:
+			road = self.roads[_id]
+			for i in range(len(road.values())):
+				l = list(road.values())
+				n_lat = l[i]["lat"]
+				n_lon = l[i]["lon"]
+				r_x = (n_lon - coords["lon"])
+				r_y = (n_lat - coords["lat"])
+				r_y *= -1
+				r_x *= RENDER_MULTIPLIER
+				r_y *= RENDER_MULTIPLIER
+				r_x += HALF_WIDTH
+				r_y += HALF_HEIGHT
+
+				#pygame.draw.circle(win, (255,0,0), (r_x, r_y), 1, 1)
+				
+				if i+1 < len(road.values()):
+					n_lat2 = l[i+1]["lat"]
+					n_lon2 = l[i+1]["lon"]
+					r_x2 = (n_lon2 - coords["lon"])
+					r_y2 = (n_lat2 - coords["lat"])
+					r_y2 *= -1
+					r_x2 *= RENDER_MULTIPLIER
+					r_y2 *= RENDER_MULTIPLIER
+					r_x2 += HALF_WIDTH
+					r_y2 += HALF_HEIGHT
+					
+
+					pygame.draw.line(win, (120,120,120), (r_x, r_y), (r_x2, r_y2), 2)
 
 os.makedirs("cache", exist_ok=True)
 
@@ -158,9 +211,9 @@ HALF_HEIGHT = HEIGHT // 2
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
-RENDER_MULTIPLIER = CIRCLE_R * 2
 ZONE = 0.05
 CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
+RENDER_MULTIPLIER = 7000
 
 REFRESH_SECS = 2
 FPS = 60
@@ -171,8 +224,9 @@ toAdd = math.pi*2/FPS / 5 #5 seconds
 over_api = overpy.Overpass()
 fr_api = FlightRadar24API()
 
-f_mngr = FlightManager()
 r_mngr = RoadManager()
+f_mngr = FlightManager()
+
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -200,6 +254,8 @@ while running:
 	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, CIRCLE_R, 1)
 	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3, 1)
 	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3*2, 1)
+
+	r_mngr.renderRoads()
 
 	p_r = CIRCLE_R
 	p_x = p_r * cos(angle) + CIRCLE_CENTER[0]
