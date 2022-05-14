@@ -219,7 +219,7 @@ HALF_HEIGHT = HEIGHT // 2
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
-ZONE = 1
+ZONE = 0.3
 CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 RENDER_MULTIPLIER = CIRCLE_R / ZONE #pixels per km
 
