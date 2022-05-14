@@ -27,7 +27,6 @@ class FlightManager:
 	def getFlightsThread(self):
 		while True:
 			self.flights = fr_api.get_flights(bounds = self.bounds)
-			print(len(self.flights))
 			time.sleep(REFRESH_SECS)
 
 	def decideFlights(self):
@@ -223,7 +222,7 @@ ZONE = 0.3
 CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 RENDER_MULTIPLIER = CIRCLE_R / ZONE #pixels per km
 
-REFRESH_SECS = 2
+REFRESH_SECS = 1
 FPS = 60
 
 angle = 0
