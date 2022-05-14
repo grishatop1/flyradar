@@ -7,7 +7,7 @@ import threading
 from FlightRadar24.api import FlightRadar24API
 
 import math
-from math import cos, sin, atan2
+from math import cos, sin, atan2, radians
 
 from utils import calcDistance
 
@@ -63,7 +63,8 @@ class FlightManager:
 				"y": r_y,
 				"angle": f_angle,
 				"f_x": f_x,
-				"f_y": f_y
+				"f_y": f_y,
+				"heading": f.heading
 			}
 
 	def renderPlanes(self):
@@ -81,6 +82,10 @@ class FlightManager:
 
 			c = max(0, 255-255*(total/render_time))
 			color = (0,c,0)
+
+			heading = radians(f["heading"]-90)
+			pygame.draw.line(win, (40,40,50), (f["x"], f["y"]), (f["x"] + cos(heading)*1000, f["y"] + sin(heading)*1000), 1)
+
 			pygame.draw.circle(win, color, (f["x"], f["y"]), 5, 4)
 
 			txt = font1.render(
@@ -222,7 +227,7 @@ HALF_HEIGHT = HEIGHT // 2
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
-ZONE = 0.3
+ZONE = 0.5
 CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 RENDER_MULTIPLIER = CIRCLE_R / ZONE #pixels per km
 
