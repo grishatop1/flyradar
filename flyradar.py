@@ -1,10 +1,11 @@
 import sys
+import json
 import time
 import threading
 from FlightRadar24.api import FlightRadar24API
 
 import math
-from math import cos, sin
+from math import cos, sin, atan2
 
 from copy import copy
 
@@ -12,101 +13,91 @@ import pygame
 
 fr_api = FlightRadar24API()
 
-my_cords = {
-	"lat": 43.873,
-	"lon": 18.557
-}
+with open('coords.json') as f:
+	coords = json.load(f)["coords"]
 
-balkan_zone = {
-    "tl_y": 45.5,
-    "tl_x": 14.4,
-    "br_y": 42.3,
-    "br_x": 23.5
-}
+def calculateZone(distance):
+		tl_y = coords["lat"] + distance
+		tl_x = coords["lon"] - distance
+		br_y = coords["lat"] - distance
+		br_x = coords["lon"] + distance
+
+		return {
+			"tl_y": tl_y,
+			"tl_x": tl_x,
+			"br_y": br_y,
+			"br_x": br_x
+		}
 
 
-def getFlights():
-	pass
+class FlightManager:
+	def __init__(self):
+		self.flights = {}
+		self.render_flights = {}
+		self.zone = calculateZone(0.5)
+		print(self.zone)
+		self.bounds = fr_api.get_bounds(self.zone)
 
+		self.render_multiplayer = 200
 
-class PingManager:
-	def __init__(self, ips):
-		self.ips = ips
-		self.info = {}
-		self.rendercircles = {}
+		threading.Thread(target=self.getFlightsThread, daemon=True).start()
 
-		for i, ip in enumerate(self.ips):
-			angle = i*(628/len(self.ips))/100 + math.pi/6
-			self.info[ip] = {}
-			self.info[ip]["angle"] = angle
-			self.info[ip]["last_pos"] = (0,0)
-			self.info[ip]["render_pos"] = (0,0)
+	def getFlightsThread(self):
+		#later filter certain attributes
+		while True:
+			self.flights = fr_api.get_flights(bounds = self.bounds)
+			time.sleep(REFRESH_SECS)
 
-	def spawnThreads(self):
-		for ip in self.ips:
-			threading.Thread(target=self.pingThread, args=(ip,)).start()
+	def decideFlights(self):
+		flights = copy(self.flights)
+		for f in flights:
+			f_x = f.longitude
+			f_y = f.latitude
 
-	def pingThread(self, ip):
-		start = time.time()
-		result = ping(ip)
-		end = time.time()
-		total = (end-start)
-		if total < REFRESH_SECS:
-			self.info[ip]["last_ms"] = result
+			r_x = coords["lon"] - f_x
+			r_y = coords["lat"] - f_y
 
-	def decideIps(self):
-		for ip in self.info:
-			if self.info[ip]["last_ms"] > CIRCLE_R:
-				continue
-			if angle >= self.info[ip]["angle"] and angle < self.info[ip]["angle"] + 0.2:
-				self.info[ip]["render"] = time.time()
+			r_x = r_x * self.render_multiplayer
+			r_y = r_y * self.render_multiplayer
 
-	def renderIps(self):
+			f_angle = atan2(r_y, r_x)
+
+			r_x += HALF_WIDTH
+			r_y += HALF_HEIGHT
+			
+			
+			if angle >= f_angle and angle < f_angle + 0.2:
+				self.render_flights[f.id] = {
+					"aircraft": f.aircraft_code,
+					"time": time.time(),
+					"x": r_x,
+					"y": r_y,
+					"angle": f_angle
+				}
+
+	def renderPlanes(self):
 		render_time = 4 #secs max 5 (main line rotating speed)
-		for ip in copy(self.info):
-			if not "render" in self.info[ip]:
-				continue
-			if self.info[ip]["render"] is False:
-				continue
-
-			start = self.info[ip]["render"]
+		for _id in copy(self.render_flights):
+			f = self.render_flights[_id]
+			start = f["time"]
 			now = time.time()
 			total = now-start
 
-			if self.info[ip]["render_ms"]:
-				p_r = self.info[ip]["render_ms"]
-			else:
-				p_r = self.info[ip]["last_ms"]
-				self.info[ip]["render_ms"] = p_r
-
 
 			if total >= render_time:
-				self.info[ip]["render"] = False
-				self.info[ip]["render_ms"] = None
+				del self.render_flights[_id]
 				continue
-
-			p_angle = self.info[ip]["angle"]
-			if self.info[ip]["render_ms"] >= 150:
-				p_r *= 1.25
-			elif 150 > self.info[ip]["render_ms"] >= 100:
-				p_r *= 1.5
-			elif 100 > self.info[ip]["render_ms"] >= 50:
-				p_r *= 1.75
-			else:
-				p_r *= 2
-			p_x = p_r * cos(p_angle) + CIRCLE_CENTER[0]
-			p_y = p_r * sin(p_angle) + CIRCLE_CENTER[1]
 
 			c = max(0, 255-255*(total/render_time))
 			color = (0,c,0)
-			pygame.draw.circle(win, color, (p_x, p_y), 5, 4)
+			pygame.draw.circle(win, color, (f["x"], f["y"]), 5, 4)
 
 			txt = font1.render(
-				f"{ip} {self.info[ip]['render_ms']}ms",
+				f"{f['aircraft']}",
 				True,
 				color
 			)
-			win.blit(txt, (p_x+5, p_y+5))
+			win.blit(txt, (f["x"]+5, f["y"]+5))
 
 pygame.init()
 FPS = 60
@@ -126,16 +117,12 @@ pygame.display.set_caption("Ping Radar")
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
-REFRESH_SECS = 1
+REFRESH_SECS = 2
 
 angle = 0
 toAdd = math.pi*2/FPS / 5 #5 seconds
 
-ips = sys.argv[1:]
-ping_manager = PingManager(ips)
-
-ping_mngr_elapsed = 2500
-revolutions = 0
+f_mngr = FlightManager()
 
 running = True
 while running:
@@ -145,17 +132,11 @@ while running:
 		if event.type == pygame.QUIT:
 			running = False
 
-	ping_mngr_elapsed += d
-
-	if ping_mngr_elapsed > REFRESH_SECS*1000: # 0.5s
-		ping_manager.spawnThreads()
-		ping_mngr_elapsed = 0
-
 	if angle >= math.pi*2:
 		angle = 0
 
-	ping_manager.decideIps()
-	ping_manager.renderIps()
+	f_mngr.decideFlights()
+	f_mngr.renderPlanes()
 
 	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, CIRCLE_R, 1)
 	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3, 1)
