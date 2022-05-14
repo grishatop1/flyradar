@@ -53,7 +53,7 @@ class FlightManager:
 
 
 			if r_x < 0 or r_x > WIDTH or r_y < 0 or r_y > HEIGHT:
-				print("out of screen")
+				pass
 
 
 			#if angle >= f_angle and angle < f_angle + 1:
@@ -115,7 +115,7 @@ class RoadManager:
 			print("Getting road data in your region...")
 			roads = self.getRoads()
 			with open(f"cache/{zone_hash}.json", "w") as f:
-				json.dump(roads, f, indent=4)
+				json.dump(roads, f)
 
 	def getRoads(self):
 		z = self.zone
@@ -211,9 +211,9 @@ HALF_HEIGHT = HEIGHT // 2
 CIRCLE_R = HALF_HEIGHT - 20 #radius
 CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
 
-ZONE = 0.05
+ZONE = 0.09
 CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
-RENDER_MULTIPLIER = CIRCLE_R_KM * 2000
+RENDER_MULTIPLIER = CIRCLE_R / ZONE
 
 REFRESH_SECS = 2
 FPS = 60
