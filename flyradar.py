@@ -33,47 +33,16 @@ class FlightManager:
 	def decideFlights(self):
 		flights = copy(self.flights)
 		for f in flights:
-			f_x = f.longitude
-			f_y = f.latitude
-
-			r_x = coords["lon"] - f_x
-			r_y = coords["lat"] - f_y
-
-
-			r_x = r_x * RENDER_MULTIPLIER
-			r_y = r_y * RENDER_MULTIPLIER
-
-
-			r_x *= -1
-
-			f_angle = atan2(r_y, r_x)
-
-			r_x += HALF_WIDTH
-			r_y += HALF_HEIGHT
-
-
-			if r_x < 0 or r_x > WIDTH or r_y < 0 or r_y > HEIGHT:
-				pass
-
-
 			#if angle >= f_angle and angle < f_angle + 1:
-			self.render_flights[f.id] = {
-				"aircraft": f.callsign,
-				"time": time.time(),
-				"x": r_x,
-				"y": r_y,
-				"angle": f_angle,
-				"f_x": f_x,
-				"f_y": f_y,
-				"heading": f.heading,
-				"on_ground": f.on_ground
-			}
+			self.render_flights[f.id] = [
+				f, time.time()
+			]
 
 	def renderPlanes(self):
 		render_time = 4 #secs max 5 (main line rotating speed)
-		for _id in copy(self.render_flights):
-			f = self.render_flights[_id]
-			start = f["time"]
+		render_f = copy(self.render_flights)
+		remove_selection = True
+		for _id, (f, start) in render_f.items():
 			now = time.time()
 			total = now-start
 
@@ -81,36 +50,59 @@ class FlightManager:
 				del self.render_flights[_id]
 				continue
 
+			f_x = f.longitude
+			f_y = f.latitude
+
+			fr_x = coords["lon"] - f_x
+			fr_y = coords["lat"] - f_y
+			r_x = fr_x * RENDER_MULTIPLIER
+			r_y = fr_y * RENDER_MULTIPLIER
+			r_x *= -1
+			f_angle = atan2(r_y, r_x)
+			r_x += HALF_WIDTH
+			r_y += HALF_HEIGHT
+
+
+			if pitagor(m_x, m_y, r_x, r_y) < 10:
+				if m1:
+					i_panel.selectFlight(f.id)
+					remove_selection = False
+				pygame.draw.circle(win, (255,255,255), (r_x,r_y), 10,2)
+
+			#if r_x < 0 or r_x > WIDTH or r_y < 0 or r_y > HEIGHT:
+			#	pass
 			c = max(0, 255-255*(total/render_time))
 
-			if f["on_ground"]:
+			if f.on_ground:
 				c = 127
 
 			color = (0,c,0)
 
-			heading = radians(f["heading"]-90)
+			heading = radians(f.heading-90)
 
 			pygame.draw.line(win, (40,40,50),
-			(f["x"], f["y"]),
-			(f["x"] + cos(heading)*1000, f["y"] + sin(heading)*1000), 1)
-			self.triangle.render(heading, f["x"], f["y"], color)
+			(r_x, r_y),
+			(r_x + cos(heading)*1000, r_y + sin(heading)*1000), 1)
 
-			#pygame.draw.circle(win, color, (f["x"], f["y"]), 5, 4)
+			self.triangle.render(heading, r_x, r_y, color)
 
 			txt = font1.render(
-				f"{f['aircraft']}",
+				f"{f.callsign}",
 				True,
 				color
 			)
-			win.blit(txt, (f["x"]+5, f["y"]+5))
-			dist = calcDistance(coords["lat"], coords["lon"], f["f_y"], f["f_x"])
+			win.blit(txt, (r_x+5, r_y+5))
+			dist = calcDistance(coords["lat"], coords["lon"], f_y, f_x)
 
 			txt = font1.render(
 				f"{dist:.2f}km",
 				True,
 				color
 			)
-			win.blit(txt, (f["x"]+5, f["y"]+25))
+			win.blit(txt, (r_x+5, r_y+25))
+
+		if remove_selection and m1:
+			i_panel.deselect()
 
 class RoadManager:
 	def __init__(self):
@@ -195,6 +187,53 @@ class RoadManager:
 	def renderRoads(self):
 		win.blit(self.s, (0,0))
 
+class InfoPanel:
+	def __init__(self):
+		self.SIZE = ()
+		self.f_selected = None
+		self.info = [
+			["Latitude", "latitude"],
+			["Longitude", "longitude"],
+			["Heading", "heading"],
+			["Callsign", "callsign"],
+			["Aircraft", "aircraft_code"]
+		]
+		self.surf = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA, 32)
+
+	def selectFlight(self, f):
+		self.f_selected = f
+
+	def deselect(self):
+		self.f_selected = None
+
+	def draw(self):
+		self.surf.fill((0,0,0,0))
+		offset_y = 5
+		margin = 3
+		max_width = 0#et sad se updejtuje
+		f = f_mngr.render_flights[self.f_selected][0]
+		for info, f_info in self.info:
+			data = getattr(f, f_info)
+			txt = font1.render(
+				f"{info}: {data}",
+				True,
+				(0,255,0)
+			)
+			self.surf.blit(txt, (5, offset_y))
+			offset_y += txt.get_height() + margin
+			if txt.get_width() > max_width:
+				max_width = txt.get_width()
+
+		pygame.draw.rect(self.surf, (0,255,0),
+			(0, 0, max_width + 10, offset_y + 5), 5
+		)
+
+	def update(self):
+		if not self.f_selected:
+			return
+		self.draw()
+		win.blit(self.surf, (0,0))
+
 os.makedirs("cache", exist_ok=True)
 
 if not os.path.exists("coords.json"):
@@ -244,6 +283,7 @@ fr_api = FlightRadar24API()
 
 r_mngr = RoadManager()
 f_mngr = FlightManager()
+i_panel = InfoPanel()
 
 box_size_km = calcDistance(coords["lat"], coords["lon"], coords["lat"] + ZONE, coords["lon"] + ZONE)
 
@@ -258,6 +298,7 @@ pygame.display.set_caption("Ping Radar")
 
 f_mngr.triangle.setSurface(win)
 
+
 running = True
 while running:
 	d = clock.tick(FPS)
@@ -265,6 +306,9 @@ while running:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			running = False
+
+	m_x, m_y = pygame.mouse.get_pos()
+	m1, m_scroll, m2 = pygame.mouse.get_pressed()
 
 	if angle >= math.pi*2:
 		angle = 0
@@ -282,9 +326,11 @@ while running:
 	p_r = CIRCLE_R
 	p_x = p_r * cos(angle) + CIRCLE_CENTER[0]
 	p_y = p_r * sin(angle) + CIRCLE_CENTER[1]
-	pygame.draw.line(win, (0,255,0), CIRCLE_CENTER, (p_x, p_y), 1) #main lajna
 
 	drawDecorations(font1, win, box_size_km)
+	pygame.draw.line(win, (0,255,0), CIRCLE_CENTER, (p_x, p_y), 1) #main lajna
+
+	i_panel.update()
 
 	pygame.display.update()
 	angle += TOADD
