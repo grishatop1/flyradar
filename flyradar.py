@@ -8,7 +8,7 @@ import hashlib
 import threading
 
 from math import cos, sin, atan2, radians
-from utils import calcDistance, pitagor, Triangle
+from utils import calcDistance, pitagor, Triangle, drawDecorations
 from copy import copy
 
 import pygame
@@ -284,58 +284,7 @@ while running:
 	p_y = p_r * sin(angle) + CIRCLE_CENTER[1]
 	pygame.draw.line(win, (0,255,0), CIRCLE_CENTER, (p_x, p_y), 1) #main lajna
 
-
-	pygame.draw.line(
-		win,
-		(127,127,127),
-		(0, HALF_HEIGHT),
-		(WIDTH, HALF_HEIGHT),
-		1
-	)
-
-	pygame.draw.line(
-		win,
-		(127,127,127),
-		(HALF_WIDTH, 0),
-		(HALF_WIDTH, HEIGHT),
-		1
-	)
-
-	txt = font1.render(
-		f"{int(box_size_km)}km receiving box",
-		True,
-		(255,255,255)
-	)
-	win.blit(txt, (HALF_WIDTH + CIRCLE_R + 5, HALF_HEIGHT + 5))
-
-	#on each side of the screen, make north south east and west text
-	txt = font1.render(
-		"N",
-		True,
-		(255,255,255)
-	)
-	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, 0))
-
-	txt = font1.render(
-		"S",
-		True,
-		(255,255,255)
-	)
-	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, HEIGHT-txt.get_height()))
-
-	txt = font1.render(
-		"E",
-		True,
-		(255,255,255)
-	)
-	win.blit(txt, (WIDTH-txt.get_width()/2-(HALF_HEIGHT/3), HALF_HEIGHT-txt.get_height()/2))
-
-	txt = font1.render(
-		"W",
-		True,
-		(255,255,255)
-	)
-	win.blit(txt, (HALF_WIDTH-txt.get_width()/2-HALF_HEIGHT, HALF_HEIGHT-txt.get_height()/2))
+	drawDecorations(font1, win, box_size_km)
 
 	pygame.display.update()
 	angle += TOADD

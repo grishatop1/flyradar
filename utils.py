@@ -1,5 +1,6 @@
 from math import sin, cos, sqrt, atan2, radians
 import pygame
+from settings import *
 
 # approximate radius of earth in km
 def calcDistance(lat1, lon1, lat2, lon2):
@@ -56,3 +57,56 @@ class Triangle():
 			corner[1]+=self.Y-self.SIZE_MOD+1
 
 		return corners
+
+def drawDecorations(font1, win, box_size_km):
+	pygame.draw.line(
+		win,
+		(127,127,127),
+		(0, HALF_HEIGHT),
+		(WIDTH, HALF_HEIGHT),
+		1
+	)
+
+	pygame.draw.line(
+		win,
+		(127,127,127),
+		(HALF_WIDTH, 0),
+		(HALF_WIDTH, HEIGHT),
+		1
+	)
+
+	txt = font1.render(
+		f"{int(box_size_km)}km receiving box",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH + CIRCLE_R + 5, HALF_HEIGHT + 5))
+
+	#on each side of the screen, make north south east and west text
+	txt = font1.render(
+		"N",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, 0))
+
+	txt = font1.render(
+		"S",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH-txt.get_width()/2, HEIGHT-txt.get_height()))
+
+	txt = font1.render(
+		"E",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (WIDTH-txt.get_width()/2-(HALF_HEIGHT/3), HALF_HEIGHT-txt.get_height()/2))
+
+	txt = font1.render(
+		"W",
+		True,
+		(255,255,255)
+	)
+	win.blit(txt, (HALF_WIDTH-txt.get_width()/2-HALF_HEIGHT, HALF_HEIGHT-txt.get_height()/2))
