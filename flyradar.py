@@ -67,7 +67,7 @@ class FlightManager:
 				if m1:
 					i_panel.selectFlight(f.id)
 					remove_selection = False
-				pygame.draw.circle(win, (255,255,255), (r_x,r_y), 10,2)
+				pygame.draw.circle(win, (255,255,255), (r_x-3,r_y-3), 10,2)
 
 			#if r_x < 0 or r_x > WIDTH or r_y < 0 or r_y > HEIGHT:
 			#	pass
@@ -216,7 +216,7 @@ class InfoPanel:
 		except KeyError:
 			self.deselect()
 			return
-			
+
 		for info, f_info in self.info:
 			data = getattr(f, f_info)
 			txt = font1.render(
