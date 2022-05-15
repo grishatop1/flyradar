@@ -192,8 +192,20 @@ class RoadManager:
 
 os.makedirs("cache", exist_ok=True)
 
-with open('coords.json') as f:
-	coords = json.load(f)["coords"]
+if not os.path.exists("coords.json"):
+	print("Please set your coordinates in coords.json")
+	with open("coords.json", "w") as f:
+		data = {
+			"coords": {
+				"lat": 0,
+				"lon": 0
+			}
+		}
+		json.dump(data, f)
+	exit()
+else:
+	with open('coords.json') as f:
+		coords = json.load(f)["coords"]
 
 def pitagor(x1, y1, x2, y2):
 	return math.sqrt((x2-x1)**2 + (y2-y1)**2)
