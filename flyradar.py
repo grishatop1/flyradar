@@ -8,7 +8,7 @@ import hashlib
 import threading
 
 from math import cos, sin, atan2, radians
-from utils import calcDistance, pitagor, Triangle, drawDecorations
+from utils import *
 from copy import copy
 
 import pygame
@@ -226,6 +226,8 @@ class InfoPanel:
 
 		for info, f_info in self.info:
 			data = getattr(f, f_info)
+			if f_info == "heading":
+				data = degrees_to_cardinal(data)
 			txt = font1.render(
 				f"{info}: {data}",
 				True,

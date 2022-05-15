@@ -2,6 +2,12 @@ from math import sin, cos, sqrt, atan2, radians
 import pygame
 from settings import *
 
+def degrees_to_cardinal(d):
+	dirs = ["W", "WSW", "SW", "SSW", "S", "SSE", "SE", "ESE",
+			"E", "ENE", "NE", "NNE", "N", "NNW", "NW", "WNW"]
+	ix = int((d + 11.25)/22.5)
+	return dirs[ix % 16]
+
 # approximate radius of earth in km
 def calcDistance(lat1, lon1, lat2, lon2):
 	R = 6373.0
