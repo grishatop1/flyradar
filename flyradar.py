@@ -1,19 +1,19 @@
+from settings import *
+
 import os
 import json
 import time
-import overpy
+import math
 import hashlib
 import threading
-from FlightRadar24.api import FlightRadar24API
 
-import math
 from math import cos, sin, atan2, radians
-
-from utils import calcDistance
-
+from utils import calcDistance, pitagor
 from copy import copy
 
 import pygame
+import overpy
+from FlightRadar24.api import FlightRadar24API
 
 class Triangle():
 	def __init__(self):
@@ -243,9 +243,6 @@ else:
 	with open('coords.json') as f:
 		coords = json.load(f)["coords"]
 
-def pitagor(x1, y1, x2, y2):
-	return math.sqrt((x2-x1)**2 + (y2-y1)**2)
-
 def calculateZone(distance):
 		tl_y = coords["lat"] + distance
 		tl_x = coords["lon"] - distance
@@ -271,23 +268,7 @@ def calculateZoneOverpy(distance):
 		"e": east_edge
 	}
 
-WIDTH = 1024
-HEIGHT = 768
-HALF_WIDTH = WIDTH // 2
-HALF_HEIGHT = HEIGHT // 2
-
-CIRCLE_R = HALF_HEIGHT - 20 #radius
-CIRCLE_CENTER = (HALF_WIDTH, HALF_HEIGHT) #x,y
-
-ZONE = 0.5
-CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
-RENDER_MULTIPLIER = CIRCLE_R / ZONE #pixels per km
-
-REFRESH_SECS = 1
-FPS = 60
-
 angle = 0
-toAdd = math.pi*2/FPS / 5 #5 seconds
 
 over_api = overpy.Overpass()
 fr_api = FlightRadar24API()
@@ -295,6 +276,7 @@ fr_api = FlightRadar24API()
 r_mngr = RoadManager()
 f_mngr = FlightManager()
 
+CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -385,7 +367,7 @@ while running:
 	win.blit(txt, (HALF_WIDTH-txt.get_width()/2-HALF_HEIGHT, HALF_HEIGHT-txt.get_height()/2))
 
 	pygame.display.update()
-	angle += toAdd
+	angle += TOADD
 
 pygame.quit()
 quit()

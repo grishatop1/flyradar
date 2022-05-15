@@ -17,3 +17,6 @@ def calcDistance(lat1, lon1, lat2, lon2):
 
     distance = R * c
     return distance
+
+def pitagor(x1, y1, x2, y2):
+	return sqrt((x2-x1)**2 + (y2-y1)**2)
