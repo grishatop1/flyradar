@@ -64,7 +64,8 @@ class FlightManager:
 				"angle": f_angle,
 				"f_x": f_x,
 				"f_y": f_y,
-				"heading": f.heading
+				"heading": f.heading,
+				"on_ground": f.on_ground
 			}
 
 	def renderPlanes(self):
@@ -80,7 +81,11 @@ class FlightManager:
 				del self.render_flights[_id]
 				continue
 
-			c = max(0, 255-255*(total/render_time))
+			if f["on_ground"]:
+				#c = max(0, 255-255*(total/render_time))
+				c = 127
+			else:
+				c = 255
 			color = (0,c,0)
 
 			heading = radians(f["heading"]-90)
@@ -134,7 +139,7 @@ class RoadManager:
 			out skel qt;
 			"""
 		res = over_api.query(query)
-		
+
 		roads = {}
 
 		for way in res.ways:
@@ -144,7 +149,7 @@ class RoadManager:
 					"lat": float(n.lat),
 					"lon": float(n.lon)
 				}
-		
+
 		return roads
 
 	def preRenderRoads(self):
@@ -178,7 +183,7 @@ class RoadManager:
 					r_y2 *= RENDER_MULTIPLIER
 					r_x2 += HALF_WIDTH
 					r_y2 += HALF_HEIGHT
-					
+
 
 					pygame.draw.line(s, (65,65,65), (r_x, r_y), (r_x2, r_y2), 2)
 		self.s = s
