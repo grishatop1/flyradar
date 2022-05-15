@@ -8,43 +8,12 @@ import hashlib
 import threading
 
 from math import cos, sin, atan2, radians
-from utils import calcDistance, pitagor
+from utils import calcDistance, pitagor, Triangle
 from copy import copy
 
 import pygame
 import overpy
 from FlightRadar24.api import FlightRadar24API
-
-class Triangle():
-	def __init__(self):
-		self.ANGLE_MOD = radians(135)
-		self.SIZE_MOD = 5
-
-	def render(self, heading, x, y, color):
-		self.heading = heading
-		self.X, self.Y = x, y
-		self.color = color
-		self.corners = self.setCorners()
-
-		pygame.draw.polygon(win, self.color, self.corners)
-
-	def setCorners(self):
-		front = [cos(self.heading),
-							sin(self.heading)]
-		sideA = [cos(self.heading-self.ANGLE_MOD),
-							sin(self.heading-self.ANGLE_MOD)]
-		sideB = [cos(self.heading+self.ANGLE_MOD),
-							sin(self.heading+self.ANGLE_MOD)]
-
-		corners = [front, sideA, sideB]
-
-		for corner in corners:
-			corner[0]*=self.SIZE_MOD
-			corner[1]*=self.SIZE_MOD
-			corner[0]+=self.X-self.SIZE_MOD+1
-			corner[1]+=self.Y-self.SIZE_MOD+1
-
-		return corners
 
 class FlightManager:
 	def __init__(self):
@@ -286,6 +255,8 @@ font1 = pygame.font.SysFont('Arial', 15)
 
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Ping Radar")
+
+f_mngr.triangle.setSurface(win)
 
 running = True
 while running:
