@@ -14,6 +14,9 @@ from copy import copy
 import pygame
 import overpy
 from FlightRadar24.api import FlightRadar24API
+import airportsdata
+
+airports = airportsdata.load('IATA')
 
 class FlightManager:
 	def __init__(self):
@@ -199,8 +202,10 @@ class InfoPanel:
 			["Longitude", "longitude"],
 			["Heading", "heading"],
 			["Callsign", "callsign"],
+			["Aircraft", "aircraft_code"],
 			["Ground speed", "ground_speed"],
-			["Aircraft", "aircraft_code"]
+			["From", "origin_airport_iata"],
+			["To", "destination_airport_iata"]
 		]
 		self.surf = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA, 32)
 
@@ -229,6 +234,16 @@ class InfoPanel:
 			data = getattr(f, f_info)
 			if f_info == "heading":
 				data = degrees_to_cardinal(data)
+			elif f_info == "origin_airport_iata":
+				try:
+					data = airports(data)
+				except:
+					continue
+			elif f_info == "destination_airport_iata":
+				try:
+					data = airports(data)
+				except:
+					continue
 			txt = font1.render(
 				f"{info}: {data}",
 				True,
