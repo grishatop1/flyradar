@@ -245,7 +245,7 @@ fr_api = FlightRadar24API()
 r_mngr = RoadManager()
 f_mngr = FlightManager()
 
-CIRCLE_R_KM = calcDistance(coords["lat"], coords["lon"], coords["lat"], coords["lon"] + ZONE)
+box_size_km = calcDistance(coords["lat"], coords["lon"], coords["lat"] + ZONE, coords["lon"] + ZONE)
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -302,7 +302,7 @@ while running:
 	)
 
 	txt = font1.render(
-		f"{int(CIRCLE_R_KM)}km radius",
+		f"{int(box_size_km)}km receiving box",
 		True,
 		(255,255,255)
 	)
