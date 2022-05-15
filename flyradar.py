@@ -38,6 +38,17 @@ class FlightManager:
 				f, time.time()
 			]
 
+	def offsetPlanes(self, f_x, f_y):
+		fr_x = coords["lon"] - f_x
+		fr_y = coords["lat"] - f_y
+		r_x = fr_x * RENDER_MULTIPLIER
+		r_y = fr_y * RENDER_MULTIPLIER
+		r_x *= -1
+		f_angle = atan2(r_y, r_x)
+		r_x += HALF_WIDTH
+		r_y += HALF_HEIGHT
+		return [fr_x,fr_y,r_x,r_y,f_angle]
+
 	def renderPlanes(self):
 		render_time = 4 #secs max 5 (main line rotating speed)
 		render_f = copy(self.render_flights)
@@ -53,15 +64,7 @@ class FlightManager:
 			f_x = f.longitude
 			f_y = f.latitude
 
-			fr_x = coords["lon"] - f_x
-			fr_y = coords["lat"] - f_y
-			r_x = fr_x * RENDER_MULTIPLIER
-			r_y = fr_y * RENDER_MULTIPLIER
-			r_x *= -1
-			f_angle = atan2(r_y, r_x)
-			r_x += HALF_WIDTH
-			r_y += HALF_HEIGHT
-
+			fr_x, fr_y, r_x, r_y, f_angle = self.offsetPlanes(f_x, f_y)
 
 			if pitagor(m_x, m_y, r_x, r_y) < 10:
 				if m1:
@@ -216,6 +219,10 @@ class InfoPanel:
 		except KeyError:
 			self.deselect()
 			return
+
+		fr_x, fr_y, r_x, r_y, f_angle = f_mngr.offsetPlanes(f.longitude, f.latitude)
+
+		pygame.draw.circle(win, (255,255,255), (r_x-3,r_y-3), 10,2)
 
 		for info, f_info in self.info:
 			data = getattr(f, f_info)
