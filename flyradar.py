@@ -15,12 +15,44 @@ from copy import copy
 
 import pygame
 
+class Triangle():
+	def __init__(self):
+		self.ANGLE_MOD = radians(135)
+		self.SIZE_MOD = 5
+
+	def render(self, heading, x, y, color):
+		self.heading = heading
+		self.X, self.Y = x, y
+		self.color = color
+		self.corners = self.setCorners()
+
+		pygame.draw.polygon(win, self.color, self.corners)
+
+	def setCorners(self):
+		front = [cos(self.heading),
+							sin(self.heading)]
+		sideA = [cos(self.heading-self.ANGLE_MOD),
+							sin(self.heading-self.ANGLE_MOD)]
+		sideB = [cos(self.heading+self.ANGLE_MOD),
+							sin(self.heading+self.ANGLE_MOD)]
+
+		corners = [front, sideA, sideB]
+
+		for corner in corners:
+			corner[0]*=self.SIZE_MOD
+			corner[1]*=self.SIZE_MOD
+			corner[0]+=self.X-self.SIZE_MOD+1
+			corner[1]+=self.Y-self.SIZE_MOD+1
+
+		return corners
+
 class FlightManager:
 	def __init__(self):
 		self.flights = {}
 		self.render_flights = {}
 		self.zone = calculateZone(ZONE)
 		self.bounds = fr_api.get_bounds(self.zone)
+		self.triangle = Triangle()
 
 		threading.Thread(target=self.getFlightsThread, daemon=True).start()
 
@@ -88,9 +120,13 @@ class FlightManager:
 			color = (0,c,0)
 
 			heading = radians(f["heading"]-90)
-			pygame.draw.line(win, (40,40,50), (f["x"], f["y"]), (f["x"] + cos(heading)*1000, f["y"] + sin(heading)*1000), 1)
 
-			pygame.draw.circle(win, color, (f["x"], f["y"]), 5, 4)
+			pygame.draw.line(win, (40,40,50),
+			(f["x"], f["y"]),
+			(f["x"] + cos(heading)*1000, f["y"] + sin(heading)*1000), 1)
+			self.triangle.render(heading, f["x"], f["y"], color)
+
+			#pygame.draw.circle(win, color, (f["x"], f["y"]), 5, 4)
 
 			txt = font1.render(
 				f"{f['aircraft']}",
