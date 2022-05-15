@@ -80,12 +80,12 @@ class FlightManager:
 			if total >= render_time:
 				del self.render_flights[_id]
 				continue
+			
+			c = max(0, 255-255*(total/render_time))
 
 			if f["on_ground"]:
-				#c = max(0, 255-255*(total/render_time))
 				c = 127
-			else:
-				c = 255
+
 			color = (0,c,0)
 
 			heading = radians(f["heading"]-90)
