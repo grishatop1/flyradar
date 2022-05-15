@@ -57,7 +57,7 @@ class FlightManager:
 
 			#if angle >= f_angle and angle < f_angle + 1:
 			self.render_flights[f.id] = {
-				"aircraft": f.number,
+				"aircraft": f.callsign,
 				"time": time.time(),
 				"x": r_x,
 				"y": r_y,
@@ -75,7 +75,6 @@ class FlightManager:
 			start = f["time"]
 			now = time.time()
 			total = now-start
-
 
 			if total >= render_time:
 				del self.render_flights[_id]
