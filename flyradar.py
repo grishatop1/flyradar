@@ -199,6 +199,7 @@ class InfoPanel:
 			["Longitude", "longitude"],
 			["Heading", "heading"],
 			["Callsign", "callsign"],
+			["Ground speed", "ground_speed"],
 			["Aircraft", "aircraft_code"]
 		]
 		self.surf = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA, 32)
