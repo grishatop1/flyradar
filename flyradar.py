@@ -273,8 +273,8 @@ while running:
 	r_mngr.renderRoads()
 
 	pygame.draw.circle(win, (0,255,0), CIRCLE_CENTER, CIRCLE_R, 1)
-	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3, 1)
-	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R/3*2, 1)
+	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R//3, 1)
+	pygame.draw.circle(win, (90,90,90), CIRCLE_CENTER, CIRCLE_R//3*2, 1)
 
 	f_mngr.renderPlanes()
 
