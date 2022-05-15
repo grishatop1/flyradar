@@ -210,8 +210,13 @@ class InfoPanel:
 		self.surf.fill((0,0,0,0))
 		offset_y = 5
 		margin = 3
-		max_width = 0#et sad se updejtuje
-		f = f_mngr.render_flights[self.f_selected][0]
+		max_width = 0
+		try:
+			f = f_mngr.render_flights[self.f_selected][0]
+		except KeyError:
+			self.deselect()
+			return
+			
 		for info, f_info in self.info:
 			data = getattr(f, f_info)
 			txt = font1.render(
