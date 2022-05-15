@@ -17,7 +17,7 @@ from FlightRadar24.api import FlightRadar24API
 
 class FlightManager:
 	def __init__(self):
-		self.flights = {}
+		self.flights = []
 		self.render_flights = {}
 		self.zone = calculateZone(ZONE)
 		self.bounds = fr_api.get_bounds(self.zone)
@@ -80,7 +80,7 @@ class FlightManager:
 			if total >= render_time:
 				del self.render_flights[_id]
 				continue
-			
+
 			c = max(0, 255-255*(total/render_time))
 
 			if f["on_ground"]:
