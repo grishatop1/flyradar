@@ -54,9 +54,8 @@ class FlightManager:
 
 	def renderPlanes(self):
 		render_time = 4 #secs max 5 (main line rotating speed)
-		render_f = copy(self.render_flights)
 		remove_selection = True
-		for _id, (f, start) in render_f.items():
+		for _id, (f, start) in self.render_flights.items():
 			now = time.time()
 			total = now-start
 
