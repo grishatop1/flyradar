@@ -1,2 +1,4 @@
 pygame
 overpy
+flightradarapi
+airportsdata
