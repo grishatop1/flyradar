@@ -16,8 +16,7 @@ import overpy
 from FlightRadar24.api import FlightRadar24API
 import airportsdata
 
-airports_iata = airportsdata.load('IATA')
-airports_icao = airportsdata.load()
+airports = airportsdata.load('IATA')
 
 class FlightManager:
 	def __init__(self):
@@ -237,25 +236,17 @@ class InfoPanel:
 				data = degrees_to_cardinal(data)
 			elif f_info == "origin_airport_iata":
 				try:
-					data = airports_iata[data]['city']+', '+\
-					airports_iata[data]['country']
+					data = airports[data]['city']+', '+\
+					airports[data]['country']
 				except:
-					try:
-						data = airports_icao[data]['city']+', '+\
-						airports_icao[data]['country']
-					except:
-						continue
+					continue
 
 			elif f_info == "destination_airport_iata":
 				try:
-					data = airports_iata[data]['city']+', '+\
-					airports_iata[data]['country']
+					data = airports[data]['city']+', '+\
+					airports[data]['country']
 				except:
-					try:
-						data = airports_icao[data]['city']+', '+\
-						airports_icao[data]['country']
-					except:
-						continue
+					continue
 			txt = font1.render(
 				f"{info}: {data}",
 				True,
