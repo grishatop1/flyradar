@@ -37,6 +37,11 @@ class FlightManager:
 		flights = copy(self.flights)
 		for f in flights:
 			#if angle >= f_angle and angle < f_angle + 1:
+			f_x = f.longitude
+			f_y = f.latitude
+			fr_x, fr_y, r_x, r_y, f_angle = self.offsetPlanes(f_x, f_y)
+			if pitagor(HALF_WIDTH, HALF_HEIGHT, r_x, r_y) > CIRCLE_R:
+				continue
 			self.render_flights[f.id] = [
 				f, time.time()
 			]
@@ -55,7 +60,8 @@ class FlightManager:
 	def renderPlanes(self):
 		render_time = 4 #secs max 5 (main line rotating speed)
 		remove_selection = True
-		for _id, (f, start) in self.render_flights.items():
+		r_flights = copy(self.render_flights)
+		for _id, (f, start) in r_flights.items():
 			now = time.time()
 			total = now-start
 
