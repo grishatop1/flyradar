@@ -2,9 +2,7 @@
 
 #### Requirements:
 ```
-pip install pygame
-pip install FlightRadarAPI
-pip install overpy
+pip install pygame FlightRadarAPI overpy
 ```
 
 #### Note:
